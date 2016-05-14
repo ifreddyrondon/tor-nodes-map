@@ -1,0 +1,72 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+
+{% block nav-links %}
+
+{% endblock %}
+
+{% block content %}
+<div id="tor-nodes-map"></div>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <h2>IPs list</h2>
+            <hr>
+            <table class="table table-condensed">
+                {% for item in markers %}
+                <tr>
+                    <td>{{ item.ip }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+{{ block.super }}
+<script type="text/javascript" src="{% static "js/vendor/loader.js" %}"></script>
+<script type="text/javascript">
+    loadGoogleApi();
+    function loadGoogleApi() {
+        var l = new app.util.Loader();
+        l.require(['http://www.google.com/jsapi'], function () {
+            google.load("maps", "3", {
+                other_params: 'libraries=visualization',
+                callback: initMap
+            });
+        });
+    }
+
+    var map, bounds;
+    var markers = {{ markers | safe }};
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('tor-nodes-map'), {});
+        bounds = new google.maps.LatLngBounds();
+
+        markers.forEach(function(item){
+            if (item.latitude > -90 && item.latitude < 90 && item.longitude > -180 && item.longitude < 180) {
+                var infowindow = new google.maps.InfoWindow({
+                    content: '<b>IP:</b> ' + item.ip
+                });
+                var latLng = new google.maps.LatLng(item.latitude, item.longitude);
+                var marker = new google.maps.Marker({
+                    position: latLng,
+                    map: map
+                });
+                bounds.extend(marker.position);
+                google.maps.event.addListener(marker, 'click', function() {
+                    infowindow.open(self.map, marker);
+                });
+            }
+        });
+
+        google.maps.event.addListenerOnce(map, 'idle', function(){
+            google.maps.event.trigger(map, 'resize');
+            map.fitBounds(bounds);
+        });
+    }
+</script>
+{% endblock %}

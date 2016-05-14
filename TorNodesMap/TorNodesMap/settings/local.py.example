@@ -1,0 +1,15 @@
+# Database
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'tor_nodes_map',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    }
+}
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
